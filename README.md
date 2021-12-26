@@ -9,7 +9,7 @@
 - `pkg/` : Implementation packages with an external API.
     - `crypto/`: Provides an easy to mis-use interface to the cryptographic building blocks.
     - `net/` : Provides a 2-Party communication channel using Websockets and HTTP/2.
-    - `proto/` : Provides an abstract definition of the protocol include an HTTP/2 based implementation.
+    - `proto/` : Provides an API to protocol definition and constants.
 - `scripts/` :  Useful scripts for generating synthetic datasets for testing and simulations.
 - `tests/` : Integration tests.
 

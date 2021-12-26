@@ -25,6 +25,7 @@ func (pg *PrimeGroup) Order() *big.Int {
 }
 
 // RandomScalar returns a random scalar in the prime group.
+// TODO:Can we replace calls to RandomScalar by a Fiat-Shamir transform ?
 func (pg *PrimeGroup) RandomScalar() *big.Int {
 	s, err := rand.Int(rand.Reader, pg.order)
 	if err != nil {
