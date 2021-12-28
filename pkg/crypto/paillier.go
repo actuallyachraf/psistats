@@ -6,3 +6,6 @@ package crypto
 // Dec()
 // Add()
 // MulConst()
+func Enc() {
+
+}
