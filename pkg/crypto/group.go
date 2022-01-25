@@ -40,12 +40,19 @@ func (pg *PrimeGroup) RandomScalar() *big.Int {
 // number and the exponent is calculated (mod exponentiation is
 // used relative to the prime group used)
 // TODO:Move the operation to the Group interface
-func (pg *PrimeGroup) ModExp(data *big.Int, exp *big.Int) *big.Int {
+func (pg *PrimeGroup) ModExpHashed(data *big.Int, exp *big.Int) *big.Int {
 	modulus := pg.Order()
 	h := HashBig(data)
 	h_ := new(big.Int).SetBytes(h)
 	h_ = new(big.Int).Mod(h_, modulus)
 	modexp := new(big.Int).Exp(h_, exp, modulus)
+	return modexp
+}
+
+// ModExp implements modular exponentiation in the group.
+func (pg *PrimeGroup) ModExp(a *big.Int, k *big.Int) *big.Int {
+	modulus := pg.Order()
+	modexp := new(big.Int).Exp(a, k, modulus)
 	return modexp
 }
 

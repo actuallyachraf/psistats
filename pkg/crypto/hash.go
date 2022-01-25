@@ -26,3 +26,8 @@ func HashInt64(x int64) []byte {
 	binary.PutVarint(buf, x)
 	return H(buf)
 }
+
+// HashToBig returns the SHA-256 but casted to a big.Int
+func HashToBig(x *big.Int) *big.Int {
+	return new(big.Int).SetBytes(HashBig(x))
+}
