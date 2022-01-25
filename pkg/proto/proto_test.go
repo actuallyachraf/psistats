@@ -80,7 +80,7 @@ func TestProtocolInstance(t *testing.T) {
 		}
 		t.Log("[Bob] E(tj) : ", encBvalues)
 		// B shuffles h(ai)k1k2
-		// shuffledBshared := ShuffleBig(encBshared)
+		shuffledBshared := ShuffleBig(encBshared)
 		// B sends {h(bj)^k2,E(tj)} to A
 		// encB is h(bj)^k2
 		// encBvalues is E(tj)
@@ -99,8 +99,8 @@ func TestProtocolInstance(t *testing.T) {
 		// I = {j : h(ai)^k1k2 == h(bj)^k2k1}
 		// I is the set of B's indices that are in the interesection
 		t.Log("[Alice]h(bj)^k2k1 : ", encAshared)
-		t.Log("[Bob]h(ai)^k1k2 :", encBshared)
-		I := NaiveIntersect(encAshared, encBshared)
+		t.Log("[Bob]h(ai)^k1k2 :", shuffledBshared)
+		I := NaiveIntersect(encAshared, shuffledBshared)
 
 		t.Log("Alice computed PSI : ", I)
 	})

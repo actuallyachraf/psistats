@@ -36,7 +36,7 @@ func NaiveIntersect(a []*big.Int, b []*big.Int) []int {
 	for i := 0; i < len(a); i++ {
 		for j := 0; j < len(b); j++ {
 			if a[i].Cmp(b[j]) == 0 {
-				intersection = append(intersection, j)
+				intersection = append(intersection, i)
 			}
 		}
 	}
