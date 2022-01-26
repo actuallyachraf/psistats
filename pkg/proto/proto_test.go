@@ -2,6 +2,7 @@ package proto
 
 import (
 	"crypto/rand"
+	"math"
 	"math/big"
 	"testing"
 
@@ -113,12 +114,12 @@ func TestProtocolInstance(t *testing.T) {
 		k := int64(len(I))
 
 		// 0 <= r1 <= 2**128 - 1
-		r1UpperBound, _ := new(big.Int).SetString("340282366920938463463374607431768211455", 10)
+		r1UpperBound, _ := new(big.Int).SetString(R1ScalarUpperBound, 10)
 
 		// 2**511 <= r2 <= 2**512-1
 		r2LowerBound, _ := new(big.Int).SetString(
-			"6703903964971298549787012499102923063739682910296196688861780721860882015036773488400937149083451713845015929093243025426876941405973284973216824503042048", 10)
-		r2UpperBound, _ := new(big.Int).SetString("13407807929942597099574024998205846127479365820592393377723561443721764030073546976801874298166903427690031858186486050853753882811946569946433649006084095", 10)
+			R2ScalarLowerBound, 10)
+		r2UpperBound, _ := new(big.Int).SetString(R2ScalarUpperBound, 10)
 
 		// Sample r1
 		r1, err := rand.Int(rand.Reader, r1UpperBound)
@@ -190,6 +191,13 @@ func TestProtocolInstance(t *testing.T) {
 		statistic := new(big.Float).Quo(new(big.Float).SetInt(new(big.Int).SetBytes(decrypted)), new(big.Float).SetInt(r))
 		t.Log("[+] Computed Summary Statistic :", statistic)
 		t.Log("[+] Plaintext Computed Summary Statistic :", (bValues[2]+bValues[4]+bValues[5])/len(I))
+
+		statistic64, _ := statistic.Float64()
+		expectedStatistic := (bValues[2] + bValues[4] + bValues[5]) / len(I)
+
+		if math.Floor(statistic64) != float64(expectedStatistic) {
+			t.Errorf("failed to assert output statistic consistency expected %d got %f", expectedStatistic, statistic64)
+		}
 
 	})
 }
