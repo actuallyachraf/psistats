@@ -1,8 +1,9 @@
 package proto
 
 import (
+	"crypto/rand"
 	"math/big"
-	"math/rand"
+	mathrand "math/rand"
 )
 
 // Shuffle implements Fisher-Yates shuffling.
@@ -10,7 +11,7 @@ func Shuffle(a []int) []int {
 	var j int
 
 	for i := len(a) - 1; i > 0; i-- {
-		j = rand.Intn(i)
+		j = mathrand.Intn(i)
 		a[i], a[j] = a[j], a[i]
 	}
 	return a
@@ -21,7 +22,7 @@ func ShuffleBig(a []*big.Int) []*big.Int {
 	var j int
 
 	for i := len(a) - 1; i > 0; i-- {
-		j = rand.Intn(i)
+		j = mathrand.Intn(i)
 		a[i], a[j] = a[j], a[i]
 	}
 	return a
@@ -41,4 +42,13 @@ func NaiveIntersect(a []*big.Int, b []*big.Int) []int {
 		}
 	}
 	return intersection
+}
+
+// RandomOfBits returns a random number exactly bits long.
+func RandomOfBits(maxRange *big.Int, bits int) (*big.Int, error) {
+	r, err := rand.Int(rand.Reader, maxRange)
+	for err != nil || r.BitLen() != 1024 {
+		r, err = rand.Int(rand.Reader, maxRange)
+	}
+	return r, err
 }

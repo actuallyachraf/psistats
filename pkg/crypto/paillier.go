@@ -1,8 +1,6 @@
 package crypto
 
 import (
-	"errors"
-
 	"github.com/actuallyachraf/gomorph/gaillier"
 )
 
@@ -23,12 +21,15 @@ func Decrypt(priv *gaillier.PrivKey, enc []byte) ([]byte, error) {
 }
 
 // AddEnc adds up encrypted values.
-func AddEnc(pub *gaillier.PubKey, values ...[]byte) ([]byte, error) {
-	if len(values) != 2 {
-		return nil, errors.New("expected values to be of length two")
-	}
-	c1 := values[0]
-	c2 := values[1]
+func AddEnc(pub *gaillier.PubKey, values ...[]byte) []byte {
+	// if len(values) != 2 {
+	// 	return nil, errors.New("expected values to be of length two")
+	// }
 
-	return gaillier.Add(pub, c1, c2), nil
+	cipherOut := values[0]
+	for i := 1; i < len(values); i++ {
+		cipherOut = gaillier.Add(pub, cipherOut, values[i])
+	}
+
+	return cipherOut
 }

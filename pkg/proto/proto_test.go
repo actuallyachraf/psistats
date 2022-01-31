@@ -4,11 +4,21 @@ import (
 	"crypto/rand"
 	"math"
 	"math/big"
+	mathrand "math/rand"
 	"testing"
 
 	"github.com/actuallyachraf/gomorph/gaillier"
 	"github.com/actuallyachraf/psistats/pkg/crypto"
 )
+
+func genRandomArray(size int) []int {
+
+	s := make([]int, size)
+	for i := 0; i < size; i++ {
+		s[i] = mathrand.Int()
+	}
+	return s
+}
 
 func TestProtocolPrimitives(t *testing.T) {
 	t.Run("TestShuffle", func(t *testing.T) {
@@ -26,7 +36,7 @@ func TestProtocolInstance(t *testing.T) {
 
 		// Setup
 		// Group aggrement
-		prime, _ := new(big.Int).SetString("57896044618658097711785492504343953926634992332820282019728792003956564819949", 10)
+		prime, _ := new(big.Int).SetString(MODPGroup256, 10)
 		G := crypto.GenPrimeGroup(prime)
 		// A keypair
 		_, _, err := gaillier.GenerateKeyPair(rand.Reader, 2048)
@@ -106,10 +116,10 @@ func TestProtocolInstance(t *testing.T) {
 		t.Log("Alice computed PSI : ", I)
 
 		// Sample r
-		maxRange, _ := new(big.Int).SetString("179769313486231590772930519078902473361797697894230657273430081157732675805500963132708477322407536021120113879871393357658789768814416622492847430639474124377767893424865485276302219601246094119453082952085005768838150682342462881473913110540827237163350510684586298239947245938479716304835356329624224137216", 10)
-		r, err := rand.Int(rand.Reader, maxRange)
-		for err != nil || r.BitLen() != 1024 {
-			r, err = rand.Int(rand.Reader, maxRange)
+		maxRange, _ := new(big.Int).SetString(RScalarUpperBound, 10)
+		r, err := RandomOfBits(maxRange, 1024)
+		if err != nil {
+			t.Fatal("[Alice] failed to sample a random number with error", err)
 		}
 		k := int64(len(I))
 
@@ -148,33 +158,16 @@ func TestProtocolInstance(t *testing.T) {
 
 		t.Log("[+] Additive Homomorphic Computation :")
 
-		//sumTi := new(big.Int).SetInt64(0)
-		// for _, idx := range I {
-		// 	if idx+1 == len(encBvalues) {
-		// 		t.Log("[+] Possible overflow returning...")
-		// 		break
-		// 	}
-		// 	tmp := gaillier.Add(Bpub, encBvalues[idx].Bytes(), encBvalues[idx+1].Bytes())
-		// 	sumTi.Add(sumTi, new(big.Int).SetBytes(tmp))
-		// }
-		//for _, idx := range I {
-		//
-		//	sumTi.Add(sumTi, encBvalues[idx])
-		//}
-		idx0 := I[0]
-		idx1 := I[1]
-		idx2 := I[2]
-		c1 := encBvalues[idx0]
-		c2 := encBvalues[idx1]
-		c3 := encBvalues[idx2]
-
-		c4 := gaillier.Add(Bpub, c1.Bytes(), c2.Bytes())
-		c5 := gaillier.Add(Bpub, c4, c3.Bytes())
+		encryptedValues := make([][]byte, 0)
+		for _, idx := range I {
+			encryptedValues = append(encryptedValues, encBvalues[idx].Bytes())
+		}
+		sum := crypto.AddEnc(Bpub, encryptedValues...)
 
 		constant := new(big.Int).Sub(r, r1)
 		constant.Div(constant, bigK)
 
-		rhs := gaillier.Mul(Bpub, c5, constant.Bytes())
+		rhs := gaillier.Mul(Bpub, sum, constant.Bytes())
 
 		encr := gaillier.AddConstant(Bpub, rhs, r2.Bytes())
 
@@ -188,12 +181,19 @@ func TestProtocolInstance(t *testing.T) {
 		t.Log("[+] R bitlen :", r.BitLen())
 		t.Log("[+] Decrypted Message :", new(big.Int).SetBytes(decrypted))
 		// Approximation
+		mean := func(idx []int, values []int) int {
+			sum := 0
+			for _, i := range idx {
+				sum += values[i]
+			}
+			return sum / len(idx)
+		}
 		statistic := new(big.Float).Quo(new(big.Float).SetInt(new(big.Int).SetBytes(decrypted)), new(big.Float).SetInt(r))
 		t.Log("[+] Computed Summary Statistic :", statistic)
-		t.Log("[+] Plaintext Computed Summary Statistic :", (bValues[2]+bValues[4]+bValues[5])/len(I))
+		t.Log("[+] Plaintext Computed Summary Statistic :", mean(I, bValues))
 
 		statistic64, _ := statistic.Float64()
-		expectedStatistic := (bValues[2] + bValues[4] + bValues[5]) / len(I)
+		expectedStatistic := mean(I, bValues)
 
 		if math.Floor(statistic64) != float64(expectedStatistic) {
 			t.Errorf("failed to assert output statistic consistency expected %d got %f", expectedStatistic, statistic64)

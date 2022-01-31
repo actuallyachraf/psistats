@@ -1,5 +1,11 @@
 # psistats
 
+PSI-STATS is a 2-party aggregate statistics protocol for PSI, this is currelty a work in progress.
+You can find an example of a protocol run in `proto/proto_test.go`.
+
+As of now the protocol runs successfully on small testsets, generalizing and optimizing the protocol
+to larger sets is in progress.
+
 ## Project structure
 
 - `cmd/` : Implements a lightweight sandbox for executing the protocol.
