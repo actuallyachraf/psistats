@@ -4,21 +4,11 @@ import (
 	"crypto/rand"
 	"math"
 	"math/big"
-	mathrand "math/rand"
 	"testing"
 
 	"github.com/actuallyachraf/gomorph/gaillier"
 	"github.com/actuallyachraf/psistats/pkg/crypto"
 )
-
-func genRandomArray(size int) []int {
-
-	s := make([]int, size)
-	for i := 0; i < size; i++ {
-		s[i] = mathrand.Int()
-	}
-	return s
-}
 
 func TestProtocolPrimitives(t *testing.T) {
 	t.Run("TestShuffle", func(t *testing.T) {
@@ -162,8 +152,10 @@ func TestProtocolInstance(t *testing.T) {
 		for _, idx := range I {
 			encryptedValues = append(encryptedValues, encBvalues[idx].Bytes())
 		}
-		sum := crypto.AddEnc(Bpub, encryptedValues...)
-
+		sum, err := crypto.AddEnc(Bpub, encryptedValues...)
+		if err != nil {
+			t.Fatal("[Alice] failed to sum values with error :", err)
+		}
 		constant := new(big.Int).Sub(r, r1)
 		constant.Div(constant, bigK)
 
@@ -200,4 +192,5 @@ func TestProtocolInstance(t *testing.T) {
 		}
 
 	})
+
 }
