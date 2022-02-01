@@ -2,19 +2,29 @@ package crypto
 
 import (
 	"errors"
+	"math/big"
 
 	"github.com/actuallyachraf/gomorph/gaillier"
 )
 
-// Import Paillier
-// Define a Class Paillier and instantiate the class
-// Enc()
-// Dec()
-// Add()
-// MulConst()
+// Encrypt a message.
 func Encrypt(pub *gaillier.PubKey, message []byte) ([]byte, error) {
 	return gaillier.Encrypt(pub, message)
 
+}
+
+// EncryptInt64 encryptes multiple int64 messages.
+func EncryptInt64(pub *gaillier.PubKey, messages []int64) ([]*big.Int, error) {
+	ciphers := make([]*big.Int, len(messages))
+	for i, message := range messages {
+		messageBig := new(big.Int).SetInt64(message)
+		cipher, err := Encrypt(pub, messageBig.Bytes())
+		if err != nil {
+			return nil, err
+		}
+		ciphers[i] = new(big.Int).SetBytes(cipher)
+	}
+	return ciphers, nil
 }
 
 // Dec decrypts a Paillier encrypted message.
